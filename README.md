@@ -1,0 +1,2 @@
+# CodeGPT
+AI Coding Companion

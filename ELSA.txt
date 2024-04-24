@@ -1,3 +1,83 @@
+import net.sf.JRecord.Common.AbstractFieldValue;
+import net.sf.JRecord.Common.Constants;
+import net.sf.JRecord.Details.AbstractLine;
+import net.sf.JRecord.IO.AbstractLineReader;
+import net.sf.JRecord.IO.ICobolIOBuilder;
+import net.sf.JRecord.IO.builders.ICobolIOBuilder.IOBldrSort;
+import net.sf.JRecord.Numeric.Convert;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+public class CobolToJsonConverter {
+
+    public static void main(String[] args) throws Exception {
+        // Path to the COBOL copybook file
+        String copybookPath = "path/to/your/copybook.cbl";
+
+        // Path to the input fixed-length text file
+        String inputFilePath = "path/to/your/inputfile.txt";
+
+        // Create the CobolIOBuilder
+        ICobolIOBuilder builder = ICobolIOBuilder.newIOBuilder(copybookPath)
+                .setFileOrganization(Constants.IO_VB)
+                .setSplitCopybook(false)
+                .setDialect(ICobolIOBuilder.Dialects.FMT_INTEL)
+                .setSortType(IOBldrSort.None);
+
+        // Build the AbstractLineReader
+        AbstractLineReader reader = builder.newReader(new File(inputFilePath));
+
+        // Open the reader
+        reader.open(new File(inputFilePath));
+
+        String[] fieldNames = reader.getLayout().getFieldNames();
+        AbstractLine line;
+        Map<String, Object> jsonMap = new HashMap<>();
+
+        // Read each line from the fixed-length text file
+        while ((line = reader.read()) != null) {
+            Map<String, Object> recordMap = new HashMap<>();
+
+            // Iterate through each field in the line
+            for (int i = 0; i < fieldNames.length; i++) {
+                AbstractFieldValue fieldValue = line.getFieldValue(fieldNames[i]);
+
+                // Get field value and add it to the record map
+                recordMap.put(fieldNames[i], fieldValue.asString());
+            }
+
+            // Add the record map to the JSON map
+            jsonMap.put("record", recordMap);
+        }
+
+        // Print the JSON output
+        System.out.println(jsonMap);
+
+        // Close the reader
+        reader.close();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Here's a simple example of an Elsa workflow definition in JSON format:
 
 json

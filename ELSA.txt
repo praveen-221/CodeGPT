@@ -1,6 +1,54 @@
 import net.sf.JRecord.Common.AbstractFieldValue;
 import net.sf.JRecord.Common.Constants;
 import net.sf.JRecord.Details.AbstractLine;
+import net.sf.JRecord.External.ICobolIOBuilder;
+import net.sf.JRecord.External.RecordEditorXmlIO;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.List;
+
+public class CopybookToJSONConverter {
+
+    public static void main(String[] args) {
+        String copybookPath = "your_copybook.cbl"; // Path to your COBOL copybook file
+        String fixedLengthText = "your_fixed_length_text"; // Fixed length text string
+
+        try {
+            JSONObject jsonOutput = convertToJSON(copybookPath, fixedLengthText);
+            System.out.println(jsonOutput.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static JSONObject convertToJSON(String copybookPath, String fixedLengthText) throws IOException {
+        ICobolIOBuilder ioBldr = RecordEditorXmlIO.getLayoutBuilder();
+        ioBldr.setFileOrganization(RecordEditorXmlIO.FILE_STRUCTURE_SEQUENTIAL);
+
+        AbstractLine line = ioBldr.newReader(copybookPath).read();
+        if (line != null) {
+            line.getFieldValue(0).set(fixedLengthText);
+            List<AbstractFieldValue> fields = line.getFieldValues();
+            JSONObject jsonOutput = new JSONObject();
+            for (AbstractFieldValue field : fields) {
+                String fieldName = field.getFieldDetail().getName();
+                String fieldValue = field.asString().trim(); // Trim extra spaces
+                jsonOutput.put(fieldName, fieldValue);
+            }
+            return jsonOutput;
+        } else {
+            throw new IOException("Failed to read copybook file");
+        }
+    }
+}
+
+
+
+
+import net.sf.JRecord.Common.AbstractFieldValue;
+import net.sf.JRecord.Common.Constants;
+import net.sf.JRecord.Details.AbstractLine;
 import net.sf.JRecord.IO.AbstractLineReader;
 import net.sf.JRecord.IO.ICobolIOBuilder;
 import net.sf.JRecord.IO.builders.ICobolIOBuilder.IOBldrSort;
